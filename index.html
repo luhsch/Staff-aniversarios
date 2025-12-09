@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aniversários da STAFF</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .row-hover:hover {
+            background-color: #f8fafc;
+            transform: scale(1.01);
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-in {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-4xl glass-panel rounded-2xl shadow-2xl overflow-hidden animate-slide-in">
+        
+        <!-- Cabeçalho -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white text-center relative">
+            <div class="absolute inset-0 opacity-10 pattern-dots"></div>
+            <h1 class="text-4xl font-bold mb-2 flex items-center justify-center gap-3">
+                <i class="fas fa-calendar-alt text-yellow-300"></i>
+                Aniversários da STAFF
+            </h1>
+            <p class="text-blue-100 opacity-90">Calendário Oficial</p>
+        </div>
+
+        <!-- Alerta de Próximo Aniversário -->
+        <div id="next-event-container" class="hidden m-6">
+            <div class="bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-orange-400 p-4 rounded-r shadow-sm flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="bg-orange-100 p-3 rounded-full text-orange-600">
+                        <i class="fas fa-clock text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-orange-800 uppercase tracking-wide">Próxima Celebração</p>
+                        <p id="next-event-text" class="text-gray-800 text-lg font-medium">Carregando...</p>
+                    </div>
+                </div>
+                <i class="fas fa-birthday-cake text-orange-200 text-4xl"></i>
+            </div>
+        </div>
+
+        <!-- Tabela -->
+        <div class="overflow-x-auto p-2">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="text-gray-500 border-b border-gray-200">
+                        <th class="p-4 font-semibold text-center w-24">Dia</th>
+                        <th class="p-4 font-semibold text-center w-32">Mês</th>
+                        <th class="p-4 font-semibold">Staff</th>
+                    </tr>
+                </thead>
+                <tbody id="staff-list" class="text-gray-700">
+                    <!-- Javascript vai preencher aqui -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="bg-gray-50 p-4 text-center border-t border-gray-100 text-sm text-gray-400">
+            Lista atualizada
+        </div>
+    </div>
+
+    <script>
+        // Lista de Dados da Staff
+        // Para adicionar alguém novo, basta copiar uma linha, colar e mudar os dados.
+        const staffData = [
+            { nick: ".Kauanttx", day: 22, month: 1, monthName: "Janeiro" },
+            { nick: "StwBr123", day: 18, month: 2, monthName: "Fevereiro" },
+            { nick: "DOM", day: 3, month: 3, monthName: "Março" },
+            { nick: "CrisCraft032", day: 16, month: 3, monthName: "Março" },
+            { nick: "Continuei", day: 30, month: 3, monthName: "Março" },
+            { nick: ".BlueBlood1100", day: 15, month: 4, monthName: "Abril" },
+            { nick: "iaruchy", day: 18, month: 4, monthName: "Abril" },
+            { nick: "Turbner", day: 19, month: 4, monthName: "Abril" },
+            { nick: "Asteroidzinho", day: 11, month: 5, monthName: "Maio" },
+            { nick: "AnnyGaby", day: 23, month: 5, monthName: "Maio" },
+            { nick: "tzin7070", day: 18, month: 6, monthName: "Junho" },
+            { nick: "Invisivel", day: 28, month: 7, monthName: "Julho" },
+            { nick: "Duardopow", day: 10, month: 8, monthName: "Agosto" },
+            { nick: "yukiizinnZL", day: 23, month: 8, monthName: "Agosto" },
+            { nick: "Synth_fix", day: 12, month: 9, monthName: "Setembro" },
+            { nick: "Luhnny", day: 17, month: 10, monthName: "Outubro" },
+            { nick: "Lightz", day: 14, month: 11, monthName: "Novembro" },
+            { nick: "Goiaba", day: 18, month: 11, monthName: "Novembro" },
+            { nick: "Luz1", day: 1, month: 12, monthName: "Dezembro" },
+            { nick: "Rafa12gm", day: 9, month: 12, monthName: "Dezembro" },
+            { nick: "Nightmeaaaare", day: 10, month: 12, monthName: "Dezembro" }
+        ];
+
+        // 1. Ordenar por Mês e depois por Dia
+        staffData.sort((a, b) => {
+            if (a.month !== b.month) return a.month - b.month;
+            return a.day - b.day;
+        });
+
+        const tableBody = document.getElementById('staff-list');
+        const today = new Date();
+        const currentMonth = today.getMonth() + 1; // JS conta meses de 0-11
+        const currentDay = today.getDate();
+        
+        let nextFound = false;
+
+        // 2. Renderizar na tela
+        staffData.forEach(person => {
+            const tr = document.createElement('tr');
+            tr.className = "row-hover border-b border-gray-100 last:border-0 cursor-default group";
+            
+            // Define cor da tag do mês
+            const monthColors = [
+                'bg-red-100 text-red-700', 'bg-orange-100 text-orange-700', 'bg-yellow-100 text-yellow-700',
+                'bg-green-100 text-green-700', 'bg-emerald-100 text-emerald-700', 'bg-teal-100 text-teal-700',
+                'bg-cyan-100 text-cyan-700', 'bg-sky-100 text-sky-700', 'bg-blue-100 text-blue-700',
+                'bg-indigo-100 text-indigo-700', 'bg-violet-100 text-violet-700', 'bg-purple-100 text-purple-700'
+            ];
+            const badgeStyle = monthColors[person.month - 1] || 'bg-gray-100';
+
+            // Verifica se é hoje
+            const isToday = (person.month === currentMonth && person.day === currentDay);
+            if (isToday) {
+                tr.classList.add("bg-yellow-50");
+            }
+
+            // Lógica do Próximo Aniversariante
+            if (!nextFound) {
+                // Se o mês for maior, OU se for o mesmo mês mas o dia for hoje ou futuro
+                if (person.month > currentMonth || (person.month === currentMonth && person.day >= currentDay)) {
+                    nextFound = true;
+                    document.getElementById('next-event-container').classList.remove('hidden');
+                    
+                    const msg = isToday 
+                        ? `Hoje é dia de <span class="text-blue-600 font-bold">${person.nick}</span>!`
+                        : `<span class="font-bold text-gray-900">${person.nick}</span> dia ${person.day} de ${person.monthName}`;
+                    
+                    document.getElementById('next-event-text').innerHTML = msg;
+                }
+            }
+
+            tr.innerHTML = `
+                <td class="p-4 text-center">
+                    <span class="text-2xl font-bold text-gray-600 group-hover:text-blue-600 transition-colors">${person.day}</span>
+                </td>
+                <td class="p-4 text-center">
+                    <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${badgeStyle}">
+                        ${person.monthName}
+                    </span>
+                </td>
+                <td class="p-4 flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center mr-3 text-slate-500">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <span class="font-semibold text-lg text-gray-800">
+                        ${person.nick}
+                        ${isToday ? '<i class="fas fa-star text-yellow-400 ml-2 animate-spin-slow"></i>' : ''}
+                    </span>
+                </td>
+            `;
+            tableBody.appendChild(tr);
+        });
+
+        // Caso estejamos no final do ano e não tenha mais ninguém
+        if (!nextFound && staffData.length > 0) {
+            document.getElementById('next-event-container').classList.remove('hidden');
+            const first = staffData[0];
+            document.getElementById('next-event-text').innerHTML = 
+                `<span class="font-bold text-gray-900">${first.nick}</span> dia ${first.day} de ${first.monthName} (Ano que vem)`;
+        }
+    </script>
+</body>
+</html>
